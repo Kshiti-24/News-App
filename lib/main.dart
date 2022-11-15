@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'articleNews.dart';
 import 'constants.dart';
 import 'country.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 
 void main() => runApp(const MyApp());
 
@@ -68,9 +70,11 @@ class _MyAppState extends State<MyApp> {
       theme: isSwitched
           ? ThemeData(
               brightness: Brightness.light,
+              primaryColor: Colors.red,
             )
           : ThemeData(
               brightness: Brightness.dark,
+              primaryColor: Colors.red
             ),
       home: Scaffold(
         key: _scaffoldKey,
@@ -93,7 +97,7 @@ class _MyAppState extends State<MyApp> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text("Kshitiz Agarwal"),
+                            Text("               Kshitiz Agarwal"),
                             Text("kshitizagarwal2405@gmail.com"),
                           ],
                         ),
@@ -125,10 +129,11 @@ class _MyAppState extends State<MyApp> {
                 ),
                 trailing: IconButton(
                   onPressed: () async => getNews(searchKey: findNews as String),
-                  icon: const Icon(Icons.search),
+                  icon: const Icon(Icons.search,color: Colors.red,),
                 ),
               ),
               ExpansionTile(
+                leading: Icon(Icons.flag,color: Colors.red,),
                 title: const Text('Country'),
                 children: <Widget>[
                   for (int i = 0; i < listOfCountry.length; i++)
@@ -143,6 +148,7 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               ExpansionTile(
+                leading: Icon(Icons.category,color: Colors.red,),
                 title: const Text('Category'),
                 children: [
                   for (int i = 0; i < listOfCategory.length; i++)
@@ -156,6 +162,7 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               ExpansionTile(
+                leading: Icon(Icons.data_exploration,color: Colors.red,),
                 title: const Text('Channel'),
                 children: [
                   for (int i = 0; i < listOfNewsChannel.length; i++)
@@ -166,13 +173,20 @@ class _MyAppState extends State<MyApp> {
                     ),
                 ],
               ),
-              //ListTile(title: Text("Exit"), onTap: () => exit(0)),
+              FloatingActionButton(onPressed: () => SystemNavigator.pop(),backgroundColor: Colors.red,child: const Icon(Icons.exit_to_app),),
             ],
           ),
         ),
         appBar: AppBar(
           centerTitle: true,
-          title: const Text('Flutter News'),
+          title: const Text('Flutter News',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+                fontSize: 29.0
+            ),
+          ),
+          backgroundColor: Colors.red,
           actions: [
             IconButton(
               onPressed: () {
@@ -262,8 +276,8 @@ class _MyAppState extends State<MyApp> {
                                               ),
                                             ),
                                           Positioned(
-                                            bottom: 8,
-                                            right: 8,
+                                            top: 3,
+                                            right: 3,
                                             child: Card(
                                               elevation: 0,
                                               color: Theme.of(context)
