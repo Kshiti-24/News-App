@@ -172,7 +172,7 @@ class _MyAppState extends State<MyApp> {
         ),
         appBar: AppBar(
           centerTitle: true,
-          title: const Text('News'),
+          title: const Text('Flutter News'),
           actions: [
             IconButton(
               onPressed: () {
