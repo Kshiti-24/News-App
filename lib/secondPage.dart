@@ -31,7 +31,7 @@ class SecondPage extends StatelessWidget {
                 color: Colors.black,
                 child: GestureDetector(
                   child: InkWell(
-                    onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home() )),
+                    onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyApp() )),
                     child: Container(
                       alignment: Alignment.center,
                       width: 250,

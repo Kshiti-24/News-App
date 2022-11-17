@@ -3,51 +3,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:newsapp/firstPage.dart';
 import 'package:newsapp/secondPage.dart';
 import 'articleNews.dart';
 import 'constants.dart';
 import 'country.dart';
 import 'dart:async';
+import 'package:lottie/lottie.dart';
+import 'firstPage.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 
 void main() => runApp( MyApp());
-dynamic cName;
-dynamic country;
-dynamic category;
-dynamic findNews;
-int pageNum = 1;
-bool isPageLoading = false;
-late ScrollController controller;
-int pageSize = 10;
-bool isSwitched = true;
-List<dynamic> news = [];
-bool notFound = false;
-List<int> data = [];
-bool isLoading = false;
-String baseApi = 'https://newsapi.org/v2/top-headlines?';
-IconData iconDark = Icons.nights_stay;
-IconData iconLight = Icons.wb_sunny;
-IconData icon = Icons.numbers;
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Splash Screen',
-      theme: isSwitched
-          ? ThemeData(
-        brightness: Brightness.light,
-        primaryColor: Colors.red,
-      )
-          : ThemeData(
-          brightness: Brightness.dark,
-          primaryColor: Colors.red
-      ),
-      home: MyHomePage(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
+bool counter=true;
 GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 void toggleDrawer() {
@@ -94,23 +61,113 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: Colors.black,
-        child:Image.asset('assets/images/logo.png'),
+      color: Colors.black,
+      child:Image.asset('assets/images/logo.png'),
     );
   }
 }
 
-class Home extends StatefulWidget {
-  const Home({super.key});
-
-  @override
-  _HomeState createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
+class SecondPage extends StatelessWidget {
+  const SecondPage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: Colors.black,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 90,),
+              Lottie.asset('assets/images/logo.json',height: 250,width: 250,),
+              SizedBox(height: 180,),
+              Text('Be the first to know the latest news and events',style: TextStyle(
+                color: Colors.grey,
+              ),),
+              SizedBox(height: 20,),
+              Material(
+                color: Colors.black,
+                child: GestureDetector(
+                  child: InkWell(
+                    onTap: () { Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyApp() ));
+                    counter=false;
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      width: 250,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: Colors.red,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(11.0),
+                        child: Text('Get Started',style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+class MyRoutes{
+  static String firstRoute = "/first";
+}
+
+class _MyAppState extends State<MyApp> {
+  dynamic cName;
+  dynamic country;
+  dynamic category;
+  dynamic findNews;
+  int pageNum = 1;
+  bool isPageLoading = false;
+  late ScrollController controller;
+  int pageSize = 10;
+  List<dynamic> news = [];
+  bool notFound = false;
+  bool isSwitched=true;
+  List<int> data = [];
+  bool isLoading = false;
+  String baseApi = 'https://newsapi.org/v2/top-headlines?';
+  IconData iconDark = Icons.nights_stay;
+  IconData iconLight = Icons.wb_sunny;
+  IconData icon = Icons.numbers;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter News',
+        theme: isSwitched
+            ? ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Colors.red,
+        )
+            : ThemeData(
+            brightness: Brightness.dark,
+            primaryColor: Colors.red
+        ),
+      home: counter ? MyHomePage() :  Scaffold(
         key: _scaffoldKey,
         drawer: Drawer(
           child: ListView(
@@ -361,7 +418,11 @@ class _HomeState extends State<Home> {
           },
           itemCount: news.length,
         ),
-      );
+      ),
+      routes: {
+          MyRoutes.firstRoute : (context) => MyHomePage(),
+      },
+    );
   }
 
   Future<void> getDataFromApi(String url) async {
