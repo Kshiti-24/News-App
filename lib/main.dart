@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -12,9 +13,10 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 import 'firstPage.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
+import 'package:fab_circular_menu/fab_circular_menu.dart';
 
-void main() => runApp( MyApp());
-bool counter=true;
+void main() => runApp(MyApp());
+bool counter = true;
 GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 void toggleDrawer() {
@@ -27,7 +29,7 @@ void toggleDrawer() {
 
 class DropDownList extends StatelessWidget {
   const DropDownList(
-  {super.key, required this.name, required this.call, Icon? icon});
+      {super.key, required this.name, required this.call, Icon? icon});
 
   final String name;
   final Function call;
@@ -45,30 +47,29 @@ class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
+
 class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 1),
-            ()=>Navigator.pushReplacement(context,
-            MaterialPageRoute(builder:
-                (context) =>
-                SecondPage()
-            )
-        )
-    );
+    Timer(
+        Duration(seconds: 2),
+        () => Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => SecondPage())));
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.black,
-      child:Image.asset('assets/images/logo.png'),
+      child: Image.asset('assets/images/logo.png'),
     );
   }
 }
 
 class SecondPage extends StatelessWidget {
   const SecondPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,19 +84,34 @@ class SecondPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 90,),
-              Lottie.asset('assets/images/logo.json',height: 250,width: 250,),
-              SizedBox(height: 180,),
-              Text('Be the first to know the latest news and events',style: TextStyle(
-                color: Colors.grey,
-              ),),
-              SizedBox(height: 20,),
+              SizedBox(
+                height: 90,
+              ),
+              Lottie.asset(
+                'assets/images/logo.json',
+                height: 250,
+                width: 250,
+              ),
+              SizedBox(
+                height: 180,
+              ),
+              Text(
+                'Be the first to know the latest news and events',
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
               Material(
                 color: Colors.black,
                 child: GestureDetector(
                   child: InkWell(
-                    onTap: () { Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyApp() ));
-                    counter=false;
+                    onTap: () {
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) => MyApp()));
+                      counter = false;
                     },
                     child: Container(
                       alignment: Alignment.center,
@@ -106,11 +122,14 @@ class SecondPage extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: EdgeInsets.all(11.0),
-                        child: Text('Get Started',style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),),
+                        child: Text(
+                          'Get Started',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -124,19 +143,21 @@ class SecondPage extends StatelessWidget {
   }
 }
 
-
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
 }
-class MyRoutes{
+
+class MyRoutes {
   static String firstRoute = "/first";
 }
 
 class _MyAppState extends State<MyApp> {
   dynamic cName;
+  int hey = 0;
+  String IsOpened = "No";
   dynamic country;
   dynamic category;
   dynamic findNews;
@@ -146,281 +167,418 @@ class _MyAppState extends State<MyApp> {
   int pageSize = 10;
   List<dynamic> news = [];
   bool notFound = false;
-  bool isSwitched=true;
+  bool isSwitched = true;
   List<int> data = [];
   bool isLoading = false;
   String baseApi = 'https://newsapi.org/v2/top-headlines?';
   IconData iconDark = Icons.nights_stay;
   IconData iconLight = Icons.wb_sunny;
   IconData icon = Icons.numbers;
+
   @override
   Widget build(BuildContext context) {
+    var fabkey;
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter News',
-        theme: isSwitched
-            ? ThemeData(
-          brightness: Brightness.light,
-          primaryColor: Colors.red,
-        )
-            : ThemeData(
-            brightness: Brightness.dark,
-            primaryColor: Colors.red
-        ),
-      home: counter ? MyHomePage() :  Scaffold(
-        key: _scaffoldKey,
-        drawer: Drawer(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            children: <Widget>[
-              DrawerHeader(
-                child: Column(
+      debugShowCheckedModeBanner: false,
+      title: 'Newsverse',
+      theme: isSwitched
+          ? ThemeData(
+              brightness: Brightness.light,
+              primaryColor: Colors.red,
+            )
+          : ThemeData(brightness: Brightness.dark, primaryColor: Colors.red),
+      home: counter
+          ? MyHomePage()
+          : Scaffold(
+              key: _scaffoldKey,
+              drawer: Drawer(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
                   children: <Widget>[
-                    CircleAvatar(
-                      radius: 36,
-                      backgroundImage: NetworkImage(
-                          'https://media-exp1.licdn.com/dms/image/C4E03AQEUzuySJWLvrw/profile-displayphoto-shrink_800_800/0/1638700706814?e=2147483647&v=beta&t=4fS_HTAIS_d_42UYO2uyPb2togSOr_utvXa8bJUf1N0'),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text("               Kshitiz Agarwal"),
-                            Text("kshitizagarwal2405@gmail.com"),
-                          ],
-                        ),
+                    DrawerHeader(
+                      child: Column(
+                        children: <Widget>[
+                          CircleAvatar(
+                            radius: 36,
+                            backgroundImage: NetworkImage(
+                                'https://media-exp1.licdn.com/dms/image/C4E03AQEUzuySJWLvrw/profile-displayphoto-shrink_800_800/0/1638700706814?e=2147483647&v=beta&t=4fS_HTAIS_d_42UYO2uyPb2togSOr_utvXa8bJUf1N0'),
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text("               Kshitiz Agarwal"),
+                                  Text("kshitizagarwal2405@gmail.com"),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (country != null)
+                          Text('Country = $cName')
+                        else
+                          Container(),
+                        const SizedBox(height: 10),
+                        if (category != null)
+                          Text('Category = $category')
+                        else
+                          Container(),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                    ExpansionTile(
+                      leading: Icon(
+                        Icons.flag,
+                        color: Colors.red,
+                      ),
+                      title: const Text('Country'),
+                      children: <Widget>[
+                        for (int i = 0; i < listOfCountry.length; i++)
+                          DropDownList(
+                            call: () {
+                              country = listOfCountry[i]['code'];
+                              cName = listOfCountry[i]['name']!.toUpperCase();
+                              getNews();
+                            },
+                            name: listOfCountry[i]['name']!.toUpperCase(),
+                          ),
+                      ],
+                    ),
+                    ExpansionTile(
+                      leading: Icon(
+                        Icons.category,
+                        color: Colors.red,
+                      ),
+                      title: const Text('Category'),
+                      children: [
+                        for (int i = 0; i < listOfCategory.length; i++)
+                          DropDownList(
+                            call: () {
+                              category = listOfCategory[i]['code'];
+                              getNews();
+                            },
+                            name: listOfCategory[i]['name']!.toUpperCase(),
+                          )
+                      ],
+                    ),
+                    ExpansionTile(
+                      leading: Icon(
+                        Icons.data_exploration,
+                        color: Colors.red,
+                      ),
+                      title: const Text('Channel'),
+                      children: [
+                        for (int i = 0; i < listOfNewsChannel.length; i++)
+                          DropDownList(
+                            call: () =>
+                                getNews(channel: listOfNewsChannel[i]['code']),
+                            name: listOfNewsChannel[i]['name']!.toUpperCase(),
+                          ),
+                      ],
+                    ),
+                    FloatingActionButton(
+                      onPressed: () => SystemNavigator.pop(),
+                      backgroundColor: Colors.red,
+                      child: const Icon(Icons.exit_to_app),
                     ),
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (country != null)
-                    Text('Country = $cName')
-                  else
-                    Container(),
-                  const SizedBox(height: 10),
-                  if (category != null)
-                    Text('Category = $category')
-                  else
-                    Container(),
-                  const SizedBox(height: 20),
-                ],
-              ),
-              ListTile(
-                title: TextFormField(
-                  decoration: const InputDecoration(hintText: 'Find Keyword'),
-                  scrollPadding: const EdgeInsets.all(5),
-                  onChanged: (String val) => setState(() => findNews = val),
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text(
+                  'Newsverse',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
+                      fontSize: 29.0),
                 ),
-                trailing: IconButton(
-                  onPressed: () async => getNews(searchKey: findNews as String),
-                  icon: const Icon(Icons.search,color: Colors.red,),
-                ),
-              ),
-              ExpansionTile(
-                leading: Icon(Icons.flag,color: Colors.red,),
-                title: const Text('Country'),
-                children: <Widget>[
-                  for (int i = 0; i < listOfCountry.length; i++)
-                    DropDownList(
-                      call: () {
-                        country = listOfCountry[i]['code'];
-                        cName = listOfCountry[i]['name']!.toUpperCase();
-                        getNews();
-                      },
-                      name: listOfCountry[i]['name']!.toUpperCase(),
-                    ),
+                backgroundColor: Colors.red,
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      country = null;
+                      category = null;
+                      findNews = null;
+                      cName = null;
+                      getNews(reload: true);
+                    },
+                    icon: const Icon(Icons.refresh),
+                  ),
+                  IconButton(
+                    icon: Icon(isSwitched ? iconDark : iconLight),
+                    onPressed: () {
+                      setState(() {
+                        isSwitched = !isSwitched;
+                      });
+                    },
+                  ),
                 ],
-              ),
-              ExpansionTile(
-                leading: Icon(Icons.category,color: Colors.red,),
-                title: const Text('Category'),
-                children: [
-                  for (int i = 0; i < listOfCategory.length; i++)
-                    DropDownList(
-                      call: () {
-                        category = listOfCategory[i]['code'];
-                        getNews();
-                      },
-                      name: listOfCategory[i]['name']!.toUpperCase(),
-                    )
-                ],
-              ),
-              ExpansionTile(
-                leading: Icon(Icons.data_exploration,color: Colors.red,),
-                title: const Text('Channel'),
-                children: [
-                  for (int i = 0; i < listOfNewsChannel.length; i++)
-                    DropDownList(
-                      call: () =>
-                          getNews(channel: listOfNewsChannel[i]['code']),
-                      name: listOfNewsChannel[i]['name']!.toUpperCase(),
-                    ),
-                ],
-              ),
-              FloatingActionButton(onPressed: () => SystemNavigator.pop(),backgroundColor: Colors.red,child: const Icon(Icons.exit_to_app),),
-            ],
-          ),
-        ),
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text('Flutter News',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
-                fontSize: 29.0
-            ),
-          ),
-          backgroundColor: Colors.red,
-          actions: [
-            IconButton(
-              onPressed: () {
-                country = null;
-                category = null;
-                findNews = null;
-                cName = null;
-                getNews(reload: true);
-              },
-              icon: const Icon(Icons.refresh),
-            ),
-            IconButton(
-              icon: Icon(isSwitched ? iconDark : iconLight),
-              onPressed: () {
-                setState(() {
-                  isSwitched = !isSwitched;
-                });
-              },
-            ),
-          ],
-        ),
-        body: notFound
-            ? const Center(
-          child: Text('Not Found', style: TextStyle(fontSize: 30)),
-        )
-            : news.isEmpty
-            ? const Center(
-          child: CircularProgressIndicator(
-            backgroundColor: Colors.yellow,
-          ),
-        )
-            : ListView.builder(
-          controller: controller,
-          itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Card(
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: GestureDetector(
-                      onTap: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            fullscreenDialog: true,
-                            builder: (BuildContext context) =>
-                                ArticalNews(
-                                  newsUrl: news[index]['url'] as String,
-                                ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 15,
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(56),
+                  child: Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: TextField(
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        hintText: '     Search',
+                        suffixIcon: IconButton(
+                            onPressed: () =>
+                                getNews(searchKey: findNews as String),
+                            icon: Icon(
+                              Icons.search,
+                              color: Colors.grey,
+                            )),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3),
+                          borderSide: BorderSide.none,
                         ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Column(
-                          children: [
-                            Stack(
-                              children: [
-                                if (news[index]['urlToImage'] == null)
-                                  Container()
-                                else
-                                  ClipRRect(
-                                    borderRadius:
-                                    BorderRadius.circular(20),
-                                    child: CachedNetworkImage(
-                                      placeholder:
-                                          (BuildContext context,
-                                          String url) =>
-                                          Container(),
-                                      errorWidget:
-                                          (BuildContext context,
-                                          String url,
-                                          error) =>
-                                      const SizedBox(),
-                                      imageUrl: news[index]
-                                      ['urlToImage'] as String,
-                                    ),
-                                  ),
-                                Positioned(
-                                  top: 3,
-                                  right: 3,
-                                  child: Card(
-                                    elevation: 0,
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.8),
-                                    child: Padding(
-                                      padding:
-                                      const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 8,
-                                      ),
-                                      child: Text(
-                                        "${news[index]['source']['name']}",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .subtitle2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Divider(),
-                            Text(
-                              "${news[index]['title']}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            )
-                          ],
-                        ),
+                        contentPadding: EdgeInsets.zero,
+                        filled: true,
+                        fillColor: Theme.of(context).splashColor,
                       ),
+                      textInputAction: TextInputAction.search,
+                      onChanged: (String val) => setState(() => findNews = val),
                     ),
                   ),
                 ),
-                if (index == news.length - 1 && isLoading)
-                  const Center(
-                    child: CircularProgressIndicator(
-                      backgroundColor: Colors.yellow,
+              ),
+              body: notFound
+                  ? const Center(
+                      child: Text('Not Found', style: TextStyle(fontSize: 30)),
+                    )
+                  : news.isEmpty
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.yellow,
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: controller,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Card(
+                                    elevation: 5,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            fullscreenDialog: true,
+                                            builder: (BuildContext context) =>
+                                                ArticalNews(
+                                              newsUrl:
+                                                  news[index]['url'] as String,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                          horizontal: 15,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Stack(
+                                              children: [
+                                                if (news[index]['urlToImage'] ==
+                                                    null)
+                                                  Container()
+                                                else
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    child: CachedNetworkImage(
+                                                      placeholder:
+                                                          (BuildContext context,
+                                                                  String url) =>
+                                                              Container(),
+                                                      errorWidget:
+                                                          (BuildContext context,
+                                                                  String url,
+                                                                  error) =>
+                                                              const SizedBox(),
+                                                      imageUrl: news[index]
+                                                              ['urlToImage']
+                                                          as String,
+                                                    ),
+                                                  ),
+                                                Positioned(
+                                                  top: 3,
+                                                  right: 3,
+                                                  child: Card(
+                                                    elevation: 0,
+                                                    color: Theme.of(context)
+                                                        .primaryColor
+                                                        .withOpacity(0.8),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 8,
+                                                      ),
+                                                      child: Text(
+                                                        "${news[index]['source']['name']}",
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .subtitle2,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const Divider(),
+                                            Text(
+                                              "${news[index]['title']}",
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                if (index == news.length - 1 && isLoading)
+                                  const Center(
+                                    child: CircularProgressIndicator(
+                                      backgroundColor: Colors.yellow,
+                                    ),
+                                  )
+                                else
+                                  const SizedBox(),
+                              ],
+                            );
+                          },
+                          itemCount: news.length,
+                        ),
+              floatingActionButton: Builder(
+                builder: (context) => FabCircularMenu(
+                  alignment: Alignment.bottomRight,
+                  ringColor: Colors.red.withOpacity(0.0),
+                  ringDiameter: 360.0,
+                  ringWidth: 60.0,
+                  fabSize: 60.0,
+                  fabElevation: 8.0,
+                  fabColor: Colors.black,
+                  fabOpenIcon: Image.asset('assets/images/logo1.png'),
+                  fabCloseIcon: Icon(Icons.close, color: Colors.red),
+                  fabMargin: const EdgeInsets.all(20.0),
+                  animationDuration: const Duration(milliseconds: 800),
+                  animationCurve: Curves.easeInOutCirc,
+                  onDisplayChange: (isOpen) {
+                    if (isOpen) {
+                      setState(() {
+                        IsOpened = "Yes";
+                      });
+                    } else {
+                      setState(() {
+                        IsOpened = "No";
+                      });
+                    }
+                  },
+                  children: [
+                    SizedBox(
+                      height: 500,
+                      width: 500,
                     ),
-                  )
-                else
-                  const SizedBox(),
-              ],
-            );
-          },
-          itemCount: news.length,
-        ),
-      ),
+                    FloatingActionButton(
+                      mini: true,
+                      backgroundColor: Colors.black,
+                      heroTag: "Home",
+                      child: Icon(
+                        Icons.home,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          hey = hey + 1;
+                        });
+                      },
+                    ),
+                    SizedBox(
+                      height: 500,
+                      width: 500,
+                    ),
+                    FloatingActionButton(
+                      backgroundColor: Colors.black,
+                      mini: true,
+                      heroTag: "Live TV",
+                      child: Icon(
+                        Icons.video_call,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          hey = hey + 2;
+                        });
+                      },
+                    ),
+                    SizedBox(
+                      height: 500,
+                      width: 500,
+                    ),
+                    FloatingActionButton(
+                      backgroundColor: Colors.black,
+                      mini: true,
+                      heroTag: "Profile",
+                      child: Icon(
+                        Icons.account_circle,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          hey = hey - 1;
+                        });
+                      },
+                    ),
+                    SizedBox(
+                      height: 500,
+                      width: 500,
+                    ),
+                    FloatingActionButton(
+                      backgroundColor: Colors.black,
+                      mini: true,
+                      heroTag: "Setting",
+                      child: Icon(
+                        Icons.settings,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          hey = hey - 2;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
       routes: {
-          MyRoutes.firstRoute : (context) => MyHomePage(),
+        MyRoutes.firstRoute: (context) => MyHomePage(),
       },
     );
   }
@@ -456,13 +614,6 @@ class _MyAppState extends State<MyApp> {
     bool reload = false,
   }) async {
     setState(() => notFound = false);
-
-    if (!reload && !isLoading) {
-      toggleDrawer();
-    } else {
-      country = null;
-      category = null;
-    }
     if (isLoading) {
       pageNum++;
     } else {
@@ -478,15 +629,15 @@ class _MyAppState extends State<MyApp> {
       country = null;
       category = null;
       baseApi =
-      'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&sources=$channel&apiKey=58b98b48d2c74d9c94dd5dc296ccf7b6';
+          'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&sources=$channel&apiKey=58b98b48d2c74d9c94dd5dc296ccf7b6';
     }
     if (searchKey != null) {
       country = null;
       category = null;
       baseApi =
-      'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&q=$searchKey&apiKey=58b98b48d2c74d9c94dd5dc296ccf7b6';
+          'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&q=$searchKey&apiKey=58b98b48d2c74d9c94dd5dc296ccf7b6';
     }
-    //print(baseApi);
+    print(searchKey);
     getDataFromApi(baseApi);
   }
 
