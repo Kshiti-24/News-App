@@ -361,120 +361,129 @@ class _MyAppState extends State<MyApp> {
                             backgroundColor: Colors.yellow,
                           ),
                         )
-                      : ListView.builder(
-                          controller: controller,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Card(
-                                    elevation: 5,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: GestureDetector(
-                                      onTap: () async {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            fullscreenDialog: true,
-                                            builder: (BuildContext context) =>
-                                                ArticalNews(
-                                              newsUrl:
-                                                  news[index]['url'] as String,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 10,
-                                          horizontal: 15,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Stack(
-                                              children: [
-                                                if (news[index]['urlToImage'] ==
-                                                    null)
-                                                  Container()
-                                                else
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                    child: CachedNetworkImage(
-                                                      placeholder:
-                                                          (BuildContext context,
-                                                                  String url) =>
-                                                              Container(),
-                                                      errorWidget:
-                                                          (BuildContext context,
-                                                                  String url,
-                                                                  error) =>
-                                                              const SizedBox(),
-                                                      imageUrl: news[index]
-                                                              ['urlToImage']
-                                                          as String,
-                                                    ),
-                                                  ),
-                                                Positioned(
-                                                  top: 3,
-                                                  right: 3,
-                                                  child: Card(
-                                                    elevation: 0,
-                                                    color: Theme.of(context)
-                                                        .primaryColor
-                                                        .withOpacity(0.8),
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 8,
-                                                      ),
-                                                      child: Text(
-                                                        "${news[index]['source']['name']}",
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .subtitle2,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const Divider(),
-                                            Text(
-                                              "${news[index]['title']}",
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
+                      : RefreshIndicator(
+                onRefresh: () async {
+                  country = null;
+                  category = null;
+                  findNews = null;
+                  cName = null;
+                  getNews(reload: true);
+                },
+                        child: ListView.builder(
+                            controller: controller,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(5),
+                                    child: Card(
+                                      elevation: 5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              fullscreenDialog: true,
+                                              builder: (BuildContext context) =>
+                                                  ArticalNews(
+                                                newsUrl:
+                                                    news[index]['url'] as String,
                                               ),
-                                            )
-                                          ],
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 10,
+                                            horizontal: 15,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Stack(
+                                                children: [
+                                                  if (news[index]['urlToImage'] ==
+                                                      null)
+                                                    Container()
+                                                  else
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      child: CachedNetworkImage(
+                                                        placeholder:
+                                                            (BuildContext context,
+                                                                    String url) =>
+                                                                Container(),
+                                                        errorWidget:
+                                                            (BuildContext context,
+                                                                    String url,
+                                                                    error) =>
+                                                                const SizedBox(),
+                                                        imageUrl: news[index]
+                                                                ['urlToImage']
+                                                            as String,
+                                                      ),
+                                                    ),
+                                                  Positioned(
+                                                    top: 3,
+                                                    right: 3,
+                                                    child: Card(
+                                                      elevation: 0,
+                                                      color: Theme.of(context)
+                                                          .primaryColor
+                                                          .withOpacity(0.8),
+                                                      child: Padding(
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 8,
+                                                        ),
+                                                        child: Text(
+                                                          "${news[index]['source']['name']}",
+                                                          style: Theme.of(context)
+                                                              .textTheme
+                                                              .subtitle2,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const Divider(),
+                                              Text(
+                                                "${news[index]['title']}",
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                ),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                if (index == news.length - 1 && isLoading)
-                                  const Center(
-                                    child: CircularProgressIndicator(
-                                      backgroundColor: Colors.yellow,
-                                    ),
-                                  )
-                                else
-                                  const SizedBox(),
-                              ],
-                            );
-                          },
-                          itemCount: news.length,
-                        ),
+                                  if (index == news.length - 1 && isLoading)
+                                    const Center(
+                                      child: CircularProgressIndicator(
+                                        backgroundColor: Colors.yellow,
+                                      ),
+                                    )
+                                  else
+                                    const SizedBox(),
+                                ],
+                              );
+                            },
+                            itemCount: news.length,
+                          ),
+                      ),
               floatingActionButton: Builder(
                 builder: (context) => FabCircularMenu(
                   alignment: Alignment.bottomRight,
