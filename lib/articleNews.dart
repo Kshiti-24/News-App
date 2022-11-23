@@ -14,7 +14,7 @@ class ArticalNews extends StatefulWidget {
 
 class _ArticalNewsState extends State<ArticalNews> {
   final Completer<WebViewController> _completer =
-      Completer<WebViewController>();
+  Completer<WebViewController>();
   late bool _isLoadingPage;
 
   @override
