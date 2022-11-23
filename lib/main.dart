@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -161,12 +163,13 @@ class _MyAppState extends State<MyApp> {
   String IsOpened = "No";
   dynamic country;
   dynamic category;
-  dynamic findNews;
+  String? findNews;
   int pageNum = 1;
   bool isPageLoading = false;
   late ScrollController controller;
   int pageSize = 10;
   List<dynamic> news = [];
+  int j=0;
   bool notFound = false;
   bool isSwitched = true;
   List<int> data = [];
@@ -175,6 +178,9 @@ class _MyAppState extends State<MyApp> {
   IconData iconDark = Icons.nights_stay;
   IconData iconLight = Icons.wb_sunny;
   IconData icon = Icons.numbers;
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
 
   @override
   Widget build(BuildContext context) {
@@ -219,21 +225,6 @@ class _MyAppState extends State<MyApp> {
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (country != null)
-                    Text('Country = $cName')
-                  else
-                    Container(),
-                  const SizedBox(height: 10),
-                  if (category != null)
-                    Text('Category = $category')
-                  else
-                    Container(),
-                  const SizedBox(height: 20),
-                ],
-              ),
               ExpansionTile(
                 leading: Icon(
                   Icons.flag,
@@ -267,21 +258,6 @@ class _MyAppState extends State<MyApp> {
                       },
                       name: listOfCategory[i]['name']!.toUpperCase(),
                     )
-                ],
-              ),
-              ExpansionTile(
-                leading: Icon(
-                  Icons.data_exploration,
-                  color: Colors.red,
-                ),
-                title: const Text('Channel'),
-                children: [
-                  for (int i = 0; i < listOfNewsChannel.length; i++)
-                    DropDownList(
-                      call: () =>
-                          getNews(channel: listOfNewsChannel[i]['code']),
-                      name: listOfNewsChannel[i]['name']!.toUpperCase(),
-                    ),
                 ],
               ),
               FloatingActionButton(
@@ -322,34 +298,37 @@ class _MyAppState extends State<MyApp> {
               },
             ),
           ],
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(56),
-            child: Padding(
-              padding: EdgeInsets.all(10.0),
-              child: TextField(
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  hintText: '     Search',
-                  suffixIcon: IconButton(
-                      onPressed: ()  =>
-                          getNews(searchKey: findNews as String),
-                      icon: Icon(
-                        Icons.search,
-                        color: Colors.grey,
-                      )),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(3),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                  filled: true,
-                  fillColor: Theme.of(context).splashColor,
-                ),
-                textInputAction: TextInputAction.search,
-                onChanged: (String val) => setState(() => findNews = val),
-              ),
-            ),
-          ),
+          // bottom: PreferredSize(
+          //   preferredSize: Size.fromHeight(56),
+          //   child: Padding(
+          //     padding: EdgeInsets.all(10.0),
+          //     child: TextField(
+          //       onChanged: (String? val) {
+          //         setState(() => findNews = val);
+          //         print(findNews);
+          //       },
+          //       textAlign: TextAlign.center,
+          //       decoration: InputDecoration(
+          //         hintText: '     Search',
+          //         suffixIcon: IconButton(
+          //             onPressed: ()  =>
+          //                   getNews(searchKey: findNews as String),
+          //             icon: Icon(
+          //               Icons.search,
+          //               color: Colors.grey,
+          //             )),
+          //         border: OutlineInputBorder(
+          //           borderRadius: BorderRadius.circular(3),
+          //           borderSide: BorderSide.none,
+          //         ),
+          //         contentPadding: EdgeInsets.zero,
+          //         filled: true,
+          //         fillColor: Theme.of(context).splashColor,
+          //       ),
+          //       textInputAction: TextInputAction.search,
+          //     ),
+          //   ),
+          // ),
         ),
         body: notFound
             ? const Center(
@@ -367,151 +346,160 @@ class _MyAppState extends State<MyApp> {
               future: getNews(),
               // log()
               builder: (context, snapshot) {
+                print(snapshot.connectionState);
                 if (snapshot.hasData) {
-                  print('yes');
-                  print(snapshot.data!.articles[0].source!.name);
-                  return ListView.builder(
-                    controller: controller,
-                    itemBuilder:
-                        (BuildContext context, int index) {
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(5),
-                            child: Card(
-                              elevation: 5,
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius.circular(20),
-                              ),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      fullscreenDialog: true,
-                                      builder: (BuildContext
-                                      context) =>
-                                          ArticalNews(
-                                            newsUrl: snapshot
-                                                .data!
-                                                .articles[index]
-                                                .url,
-                                          ),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets
-                                      .symmetric(
-                                    vertical: 10,
-                                    horizontal: 15,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                    BorderRadius.circular(
-                                        30),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Stack(
-                                        children: [
-                                          if (snapshot
-                                              .data!
-                                              .articles[
-                                          index]
-                                              .urlToImage ==
-                                              null)
-                                            Container()
-                                          else
-                                            ClipRRect(
-                                              borderRadius:
-                                              BorderRadius
-                                                  .circular(
-                                                  20),
-                                              child:
-                                              CachedNetworkImage(
-                                                placeholder: (BuildContext
-                                                context,
-                                                    String
-                                                    url) =>
-                                                    Container(),
-                                                errorWidget: (BuildContext
-                                                context,
-                                                    String
-                                                    url,
-                                                    error) =>
-                                                const SizedBox(),
-                                                imageUrl: snapshot
-                                                    .data!
-                                                    .articles[
-                                                index]
-                                                    .urlToImage!,
-                                              ),
+                  if(j==1){
+                  checkConnection();
+                  j++;}
+                    print('yes');
+                    print(snapshot.data!.articles[0].source!.name);
+                    return ListView.builder(
+                      controller: controller,
+                      itemBuilder:
+                          (BuildContext context, int index) {
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: Card(
+                                elevation: 5,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(20),
+                                ),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        fullscreenDialog: true,
+                                        builder: (BuildContext
+                                        context) =>
+                                            ArticalNews(
+                                              newsUrl: snapshot
+                                                  .data!
+                                                  .articles[index]
+                                                  .url,
                                             ),
-                                          Positioned(
-                                            top: 3,
-                                            right: 3,
-                                            child: Card(
-                                              elevation: 0,
-                                              color: Theme.of(
-                                                  context)
-                                                  .primaryColor
-                                                  .withOpacity(
-                                                  0.8),
-                                              child: Padding(
-                                                padding:
-                                                const EdgeInsets
-                                                    .symmetric(
-                                                  horizontal:
-                                                  10,
-                                                  vertical: 8,
-                                                ),
-                                                child: Text(
-                                                  snapshot.data!.articles[index].source!.name!,
-                                                  style: Theme.of(
-                                                      context)
-                                                      .textTheme
-                                                      .subtitle2,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
                                       ),
-                                      const Divider(),
-                                      Text(
-                                        snapshot.data!.articles[index].title,
-                                        style: const TextStyle(
-                                          fontWeight:
-                                          FontWeight.bold,
-                                          fontSize: 18,
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets
+                                        .symmetric(
+                                      vertical: 10,
+                                      horizontal: 15,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                      BorderRadius.circular(
+                                          30),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Stack(
+                                          children: [
+                                            if (snapshot
+                                                .data!
+                                                .articles[
+                                            index]
+                                                .urlToImage ==
+                                                null)
+                                              Container()
+                                            else
+                                              ClipRRect(
+                                                borderRadius:
+                                                BorderRadius
+                                                    .circular(
+                                                    20),
+                                                child:
+                                                CachedNetworkImage(
+                                                  placeholder: (BuildContext
+                                                  context,
+                                                      String
+                                                      url) =>
+                                                      Container(),
+                                                  errorWidget: (BuildContext
+                                                  context,
+                                                      String
+                                                      url,
+                                                      error) =>
+                                                  const SizedBox(),
+                                                  imageUrl: snapshot
+                                                      .data!
+                                                      .articles[
+                                                  index]
+                                                      .urlToImage!,
+                                                ),
+                                              ),
+                                            Positioned(
+                                              top: 3,
+                                              right: 3,
+                                              child: Card(
+                                                elevation: 0,
+                                                color: Theme
+                                                    .of(
+                                                    context)
+                                                    .primaryColor
+                                                    .withOpacity(
+                                                    0.8),
+                                                child: Padding(
+                                                  padding:
+                                                  const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal:
+                                                    10,
+                                                    vertical: 8,
+                                                  ),
+                                                  child: Text(
+                                                    snapshot.data!
+                                                        .articles[index].source!
+                                                        .name!,
+                                                    style: Theme
+                                                        .of(
+                                                        context)
+                                                        .textTheme
+                                                        .subtitle2,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      )
-                                    ],
+                                        const Divider(),
+                                        Text(
+                                          snapshot.data!.articles[index].title,
+                                          style: const TextStyle(
+                                            fontWeight:
+                                            FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          if (index ==
-                              snapshot.data!.articles
-                                  .length -
-                                  1 &&
-                              isLoading)
-                            const Center(
-                              child: CircularProgressIndicator(
-                                backgroundColor: Colors.yellow,
-                              ),
-                            )
-                          else
-                            const SizedBox(),
-                        ],
-                      );
-                    },
-                    itemCount: snapshot.data!.articles.length,
-                  );
+                            if (index ==
+                                snapshot.data!.articles
+                                    .length -
+                                    1 &&
+                                isLoading)
+                              const Center(
+                                child: CircularProgressIndicator(
+                                  backgroundColor: Colors.yellow,
+                                ),
+                              )
+                            else
+                              const SizedBox(),
+                          ],
+                        );
+                      },
+                      itemCount: snapshot.data!.articles.length,
+                    );
                 } else if (snapshot.hasError) {
+                  checkConnection();
                   return Text('${snapshot.error}');
                 }
                 return const Center(
@@ -628,6 +616,54 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  checkConnection() async{
+    var connection =await Connectivity().checkConnectivity();
+    if(connection==ConnectivityResult.none){
+      return showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Alert Dialog Box"),
+          content: const Text('Please turn on your internet connection'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: Container(
+                color: Colors.red,
+                padding: const EdgeInsets.all(14),
+                child: const Text("okay",style: TextStyle(color: Colors.black),),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    else {
+        return showDialog(
+          context: context,
+          builder: (ctx) =>
+              AlertDialog(
+                title: const Text("Alert Dialog Box"),
+                content: const Text('Connected'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    child: Container(
+                      color: Colors.red,
+                      padding: const EdgeInsets.all(14),
+                      child: const Text(
+                        "okay", style: TextStyle(color: Colors.black),),
+                    ),
+                  ),
+                ],
+              ),
+        );
+    }
+  }
+
   Future<NewsModel> getDataFromApi(String url) async {
     final http.Response res = await http.get(Uri.parse(url));
     print(res.statusCode);
@@ -674,21 +710,20 @@ class _MyAppState extends State<MyApp> {
     baseApi += country == null ? 'country=in&' : 'country=$country&';
     baseApi += category == null ? '' : 'category=$category&';
     baseApi += 'apiKey=$apiKey';
-    if (channel != null) {
-      country = null;
-      category = null;
-      baseApi =
-      'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&sources=$channel&apiKey=58b98b48d2c74d9c94dd5dc296ccf7b6';
-    }
+    print(searchKey);
     if (searchKey != null) {
       country = null;
       category = null;
       baseApi =
-      'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&q=$searchKey&apiKey=58b98b48d2c74d9c94dd5dc296ccf7b6';
+      'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&q=$searchKey&apiKey=9bb7bf6152d147ad8ba14cd0e7452f2f';
     }
     print(searchKey);
     return getDataFromApi(baseApi);
   }
+
+
+
+
 
   @override
   void initState() {

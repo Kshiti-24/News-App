@@ -43,6 +43,8 @@ dependencies:
   flutter_exit_app: ^1.0.4
   lottie: ^2.0.0
   fab_circular_menu: ^1.0.2
+  connectivity_plus: ^2.2.1
+  internet_connection_checker: ^1.0.0+1
 
 dev_dependencies:
   flutter_test:
