@@ -665,7 +665,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<NewsModel> getDataFromApi(String url) async {
-    final http.Response res = await http.get(Uri.parse(url));
+    final http.Response res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30),onTimeout: (){
+      throw Exception ('error');
+    });
     print(res.statusCode);
     if (res.statusCode == 200) {
       // if (jsonDecode(res.body)['totalResults'] == 0) {
