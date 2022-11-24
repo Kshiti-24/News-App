@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -14,7 +13,7 @@ class ArticalNews extends StatefulWidget {
 
 class _ArticalNewsState extends State<ArticalNews> {
   final Completer<WebViewController> _completer =
-  Completer<WebViewController>();
+      Completer<WebViewController>();
   late bool _isLoadingPage;
 
   @override

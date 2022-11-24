@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 const List<Map<String, String>> listOfCountry = [
   {'name': 'INDIA', 'code': 'in'},
   {'name': 'USA', 'code': 'us'},
@@ -35,7 +36,6 @@ const List<Map<String, String>> listOfNewsChannel = [
 //
 //     final newsModel = newsModelFromJson(jsonString);
 
-
 NewsModel newsModelFromJson(String str) => NewsModel.fromJson(json.decode(str));
 
 String newsModelToJson(NewsModel data) => json.encode(data.toJson());
@@ -52,17 +52,17 @@ class NewsModel {
   List<Article> articles;
 
   factory NewsModel.fromJson(Map<String, dynamic> json) => NewsModel(
-    status: json["status"],
-    totalResults: json["totalResults"],
-    articles: List<Article>.from(
-        json["articles"].map((x) => Article.fromJson(x))),
-  );
+        status: json["status"],
+        totalResults: json["totalResults"],
+        articles: List<Article>.from(
+            json["articles"].map((x) => Article.fromJson(x))),
+      );
 
   Map<String, dynamic> toJson() => {
-    "status": status,
-    "totalResults": totalResults,
-    "articles": List<dynamic>.from(articles.map((x) => x.toJson())),
-  };
+        "status": status,
+        "totalResults": totalResults,
+        "articles": List<dynamic>.from(articles.map((x) => x.toJson())),
+      };
 }
 
 class Article {
@@ -85,24 +85,24 @@ class Article {
   String? content;
 
   factory Article.fromJson(Map<String, dynamic> json) => Article(
-    source: Source.fromJson(json["source"]),
-    title: json["title"],
-    description: json["description"],
-    url: json["url"],
-    urlToImage: json["urlToImage"],
-    publishedAt: DateTime.parse(json["publishedAt"]),
-    content: json["content"],
-  );
+        source: Source.fromJson(json["source"]),
+        title: json["title"],
+        description: json["description"],
+        url: json["url"],
+        urlToImage: json["urlToImage"],
+        publishedAt: DateTime.parse(json["publishedAt"]),
+        content: json["content"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "source": source!.toJson(),
-    "title": title,
-    "description": description,
-    "url": url,
-    "urlToImage": urlToImage,
-    "publishedAt": publishedAt.toIso8601String(),
-    "content": content,
-  };
+        "source": source!.toJson(),
+        "title": title,
+        "description": description,
+        "url": url,
+        "urlToImage": urlToImage,
+        "publishedAt": publishedAt.toIso8601String(),
+        "content": content,
+      };
 }
 
 class Source {
@@ -115,12 +115,12 @@ class Source {
   String? name;
 
   factory Source.fromJson(Map<String, dynamic> json) => Source(
-    id: json["id"],
-    name: json["name"],
-  );
+        id: json["id"],
+        name: json["name"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-  };
+        "id": id,
+        "name": name,
+      };
 }

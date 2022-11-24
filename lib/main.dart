@@ -8,14 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:newsapp/firstPage.dart';
-import 'package:newsapp/secondPage.dart';
 import 'articleNews.dart';
 import 'constants.dart';
 import 'country.dart';
 import 'dart:async';
 import 'package:lottie/lottie.dart';
-import 'firstPage.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 
@@ -340,8 +337,8 @@ class _MyAppState extends State<MyApp> {
                           getNews();
                         },
                         child: FutureBuilder<NewsModel>(
-                            future: getNews(searchKey: findNews),
-                            // log()
+                            future: getNews(searchKey: findNews,category: category,country: country ),
+
                             builder: (context, snapshot) {
                               print(snapshot.connectionState);
                               print(findNews);
@@ -350,6 +347,9 @@ class _MyAppState extends State<MyApp> {
                                   checkConnection();
                                   j++;
                                 }
+                                print(findNews);
+                                print(category);
+                                print(country);
                                 print('yes');
                                 print(snapshot.data!.articles[0].source!.name);
                                 return ListView.builder(
@@ -719,8 +719,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<NewsModel> getNews({
-    String? channel,
     String? searchKey,
+    String? category,
+    String? country,
     bool reload = false,
   }) async {
     setState(() => notFound = false);
@@ -741,9 +742,6 @@ class _MyAppState extends State<MyApp> {
       category = null;
       baseApi =
           'https://newsapi.org/v2/top-headlines?pageSize=15&page=$pageNum&q=$searchKey&apiKey=9bb7bf6152d147ad8ba14cd0e7452f2f';
-    }
-    else{
-      baseApi='https://newsapi.org/v2/top-headlines?country=in&pageSize=15&page=$pageNum&&apiKey=9bb7bf6152d147ad8ba14cd0e7452f2f';
     }
     print(searchKey);
     return getDataFromApi(baseApi);
