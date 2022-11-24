@@ -6,6 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:newsapp/firstPage.dart';
 import 'package:newsapp/secondPage.dart';
@@ -32,7 +33,7 @@ void toggleDrawer() {
 
 class DropDownList extends StatelessWidget {
   const DropDownList(
-  {super.key, required this.name, required this.call, Icon? icon});
+      {super.key, required this.name, required this.call, Icon? icon});
 
   final String name;
   final Function call;
@@ -57,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     Timer(
         Duration(seconds: 2),
-            () => Navigator.pushReplacement(
+        () => Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => SecondPage())));
   }
 
@@ -166,10 +167,11 @@ class _MyAppState extends State<MyApp> {
   String? findNews;
   int pageNum = 1;
   bool isPageLoading = false;
-  late ScrollController controller;
+
+  // ScrollController controller;
   int pageSize = 10;
   List<dynamic> news = [];
-  int j=0;
+  int j = 0;
   bool notFound = false;
   bool isSwitched = true;
   List<int> data = [];
@@ -184,441 +186,427 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Newsverse',
-      theme: isSwitched
-          ? ThemeData(
-        brightness: Brightness.light,
-        primaryColor: Colors.red,
-      )
-          : ThemeData(brightness: Brightness.dark, primaryColor: Colors.red),
-      home: counter
-          ? MyHomePage()
-          : Scaffold(
-        key: _scaffoldKey,
-        drawer: Drawer(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            children: <Widget>[
-              DrawerHeader(
-                child: Column(
-                  children: <Widget>[
-                    CircleAvatar(
-                      radius: 36,
-                      backgroundImage: NetworkImage(
-                          'https://media-exp1.licdn.com/dms/image/C4E03AQEUzuySJWLvrw/profile-displayphoto-shrink_800_800/0/1638700706814?e=2147483647&v=beta&t=4fS_HTAIS_d_42UYO2uyPb2togSOr_utvXa8bJUf1N0'),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.all(8),
+    return WillPopScope(
+      onWillPop: () => _onBackButtonPressed(context),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Newsverse',
+        theme: isSwitched
+            ? ThemeData(
+                brightness: Brightness.light,
+                primaryColor: Colors.red,
+              )
+            : ThemeData(brightness: Brightness.dark, primaryColor: Colors.red),
+        home: counter
+            ? MyHomePage()
+            : Scaffold(
+                key: _scaffoldKey,
+                drawer: Drawer(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    children: <Widget>[
+                      DrawerHeader(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text("               Kshitiz Agarwal"),
-                            Text("kshitizagarwal2405@gmail.com"),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ExpansionTile(
-                leading: Icon(
-                  Icons.flag,
-                  color: Colors.red,
-                ),
-                title: const Text('Country'),
-                children: <Widget>[
-                  for (int i = 0; i < listOfCountry.length; i++)
-                    DropDownList(
-                      call: () {
-                        country = listOfCountry[i]['code'];
-                        cName = listOfCountry[i]['name']!.toUpperCase();
-                        getNews();
-                      },
-                      name: listOfCountry[i]['name']!.toUpperCase(),
-                    ),
-                ],
-              ),
-              ExpansionTile(
-                leading: Icon(
-                  Icons.category,
-                  color: Colors.red,
-                ),
-                title: const Text('Category'),
-                children: [
-                  for (int i = 0; i < listOfCategory.length; i++)
-                    DropDownList(
-                      call: () {
-                        category = listOfCategory[i]['code'];
-                        getNews();
-                      },
-                      name: listOfCategory[i]['name']!.toUpperCase(),
-                    )
-                ],
-              ),
-              FloatingActionButton(
-                onPressed: () => SystemNavigator.pop(),
-                backgroundColor: Colors.red,
-                child: const Icon(Icons.exit_to_app),
-              ),
-            ],
-          ),
-        ),
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text(
-            'Newsverse',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
-                fontSize: 29.0),
-          ),
-          backgroundColor: Colors.red,
-          actions: [
-            IconButton(
-              onPressed: () async {
-                country = null;
-                category = null;
-                findNews = null;
-                cName = null;
-                getNews();
-              },
-              icon: const Icon(Icons.refresh),
-            ),
-            IconButton(
-              icon: Icon(isSwitched ? iconDark : iconLight),
-              onPressed: () {
-                setState(() {
-                  isSwitched = !isSwitched;
-                });
-              },
-            ),
-          ],
-          // bottom: PreferredSize(
-          //   preferredSize: Size.fromHeight(56),
-          //   child: Padding(
-          //     padding: EdgeInsets.all(10.0),
-          //     child: TextField(
-          //       onChanged: (String? val) {
-          //         setState(() => findNews = val);
-          //         print(findNews);
-          //       },
-          //       textAlign: TextAlign.center,
-          //       decoration: InputDecoration(
-          //         hintText: '     Search',
-          //         suffixIcon: IconButton(
-          //             onPressed: ()  =>
-          //                   getNews(searchKey: findNews as String),
-          //             icon: Icon(
-          //               Icons.search,
-          //               color: Colors.grey,
-          //             )),
-          //         border: OutlineInputBorder(
-          //           borderRadius: BorderRadius.circular(3),
-          //           borderSide: BorderSide.none,
-          //         ),
-          //         contentPadding: EdgeInsets.zero,
-          //         filled: true,
-          //         fillColor: Theme.of(context).splashColor,
-          //       ),
-          //       textInputAction: TextInputAction.search,
-          //     ),
-          //   ),
-          // ),
-        ),
-        body: notFound
-            ? const Center(
-          child: Text('Not Found', style: TextStyle(fontSize: 30)),
-        )
-            : RefreshIndicator(
-          onRefresh: () async {
-            country = null;
-            category = null;
-            findNews = null;
-            cName = null;
-            getNews();
-          },
-          child: FutureBuilder<NewsModel>(
-              future: getNews(),
-              // log()
-              builder: (context, snapshot) {
-                print(snapshot.connectionState);
-                if (snapshot.hasData) {
-                  if(j==1){
-                  checkConnection();
-                  j++;}
-                    print('yes');
-                    print(snapshot.data!.articles[0].source!.name);
-                    return ListView.builder(
-                      controller: controller,
-                      itemBuilder:
-                          (BuildContext context, int index) {
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Card(
-                                elevation: 5,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(20),
-                                ),
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        fullscreenDialog: true,
-                                        builder: (BuildContext
-                                        context) =>
-                                            ArticalNews(
-                                              newsUrl: snapshot
-                                                  .data!
-                                                  .articles[index]
-                                                  .url,
-                                            ),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets
-                                        .symmetric(
-                                      vertical: 10,
-                                      horizontal: 15,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                          30),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Stack(
-                                          children: [
-                                            if (snapshot
-                                                .data!
-                                                .articles[
-                                            index]
-                                                .urlToImage ==
-                                                null)
-                                              Container()
-                                            else
-                                              ClipRRect(
-                                                borderRadius:
-                                                BorderRadius
-                                                    .circular(
-                                                    20),
-                                                child:
-                                                CachedNetworkImage(
-                                                  placeholder: (BuildContext
-                                                  context,
-                                                      String
-                                                      url) =>
-                                                      Container(),
-                                                  errorWidget: (BuildContext
-                                                  context,
-                                                      String
-                                                      url,
-                                                      error) =>
-                                                  const SizedBox(),
-                                                  imageUrl: snapshot
-                                                      .data!
-                                                      .articles[
-                                                  index]
-                                                      .urlToImage!,
-                                                ),
-                                              ),
-                                            Positioned(
-                                              top: 3,
-                                              right: 3,
-                                              child: Card(
-                                                elevation: 0,
-                                                color: Theme
-                                                    .of(
-                                                    context)
-                                                    .primaryColor
-                                                    .withOpacity(
-                                                    0.8),
-                                                child: Padding(
-                                                  padding:
-                                                  const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal:
-                                                    10,
-                                                    vertical: 8,
-                                                  ),
-                                                  child: Text(
-                                                    snapshot.data!
-                                                        .articles[index].source!
-                                                        .name!,
-                                                    style: Theme
-                                                        .of(
-                                                        context)
-                                                        .textTheme
-                                                        .subtitle2,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const Divider(),
-                                        Text(
-                                          snapshot.data!.articles[index].title,
-                                          style: const TextStyle(
-                                            fontWeight:
-                                            FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
+                            CircleAvatar(
+                              radius: 36,
+                              backgroundImage: NetworkImage(
+                                  'https://media-exp1.licdn.com/dms/image/C4E03AQEUzuySJWLvrw/profile-displayphoto-shrink_800_800/0/1638700706814?e=2147483647&v=beta&t=4fS_HTAIS_d_42UYO2uyPb2togSOr_utvXa8bJUf1N0'),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(8),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text("               Kshitiz Agarwal"),
+                                    Text("kshitizagarwal2405@gmail.com"),
+                                  ],
                                 ),
                               ),
                             ),
-                            if (index ==
-                                snapshot.data!.articles
-                                    .length -
-                                    1 &&
-                                isLoading)
-                              const Center(
-                                child: CircularProgressIndicator(
-                                  backgroundColor: Colors.yellow,
-                                ),
-                              )
-                            else
-                              const SizedBox(),
                           ],
-                        );
+                        ),
+                      ),
+                      ExpansionTile(
+                        leading: Icon(
+                          Icons.flag,
+                          color: Colors.red,
+                        ),
+                        title: const Text('Country'),
+                        children: <Widget>[
+                          for (int i = 0; i < listOfCountry.length; i++)
+                            DropDownList(
+                              call: () {
+                                country = listOfCountry[i]['code'];
+                                cName = listOfCountry[i]['name']!.toUpperCase();
+                                getNews();
+                              },
+                              name: listOfCountry[i]['name']!.toUpperCase(),
+                            ),
+                        ],
+                      ),
+                      ExpansionTile(
+                        leading: Icon(
+                          Icons.category,
+                          color: Colors.red,
+                        ),
+                        title: const Text('Category'),
+                        children: [
+                          for (int i = 0; i < listOfCategory.length; i++)
+                            DropDownList(
+                              call: () {
+                                category = listOfCategory[i]['code'];
+                                getNews();
+                              },
+                              name: listOfCategory[i]['name']!.toUpperCase(),
+                            )
+                        ],
+                      ),
+                      FloatingActionButton(
+                        onPressed: () => SystemNavigator.pop(),
+                        backgroundColor: Colors.red,
+                        child: const Icon(Icons.exit_to_app),
+                      ),
+                    ],
+                  ),
+                ),
+                appBar: AppBar(
+                  centerTitle: true,
+                  title: const Text(
+                    'Newsverse',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 29.0),
+                  ),
+                  backgroundColor: Colors.red,
+                  actions: [
+                    IconButton(
+                      onPressed: () async {
+                        country = null;
+                        category = null;
+                        findNews = null;
+                        cName = null;
+                        getNews();
                       },
-                      itemCount: snapshot.data!.articles.length,
-                    );
-                } else if (snapshot.hasError) {
-                  checkConnection();
-                  return Text('${snapshot.error}');
-                }
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }),
-        ),
-
-        floatingActionButton: Builder(
-          builder: (context) => FabCircularMenu(
-            alignment: Alignment.bottomRight,
-            ringColor: Colors.red.withOpacity(0.0),
-            ringDiameter: 360.0,
-            ringWidth: 60.0,
-            fabSize: 60.0,
-            fabElevation: 8.0,
-            fabColor: Colors.black,
-            fabOpenIcon: Image.asset('assets/images/logo1.png'),
-            fabCloseIcon: Icon(Icons.close, color: Colors.red),
-            fabMargin: const EdgeInsets.all(20.0),
-            animationDuration: const Duration(milliseconds: 800),
-            animationCurve: Curves.easeInOutCirc,
-            onDisplayChange: (isOpen) {
-              if (isOpen) {
-                setState(() {
-                  IsOpened = "Yes";
-                });
-              } else {
-                setState(() {
-                  IsOpened = "No";
-                });
-              }
-            },
-            children: [
-              SizedBox(
-                height: 500,
-                width: 500,
-              ),
-              FloatingActionButton(
-                mini: true,
-                backgroundColor: Colors.black,
-                heroTag: "Home",
-                child: Icon(
-                  Icons.home,
-                  color: Colors.red,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                    IconButton(
+                      icon: Icon(isSwitched ? iconDark : iconLight),
+                      onPressed: () {
+                        setState(() {
+                          isSwitched = !isSwitched;
+                        });
+                      },
+                    ),
+                  ],
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(56),
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          hintText: 'Search',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(3),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.zero,
+                          filled: true,
+                          fillColor: Theme.of(context).splashColor,
+                        ),
+                        textInputAction: TextInputAction.search,
+                        onChanged: (String? val) {
+                          if(val!.length>3)
+                          setState(() => findNews = val);
+                        },
+                      ),
+                    ),
+                  ),
                 ),
-                onPressed: () {
-                  setState(() {
-                    hey = hey + 1;
-                  });
-                },
-              ),
-              SizedBox(
-                height: 500,
-                width: 500,
-              ),
-              FloatingActionButton(
-                backgroundColor: Colors.black,
-                mini: true,
-                heroTag: "Live TV",
-                child: Icon(
-                  Icons.video_call,
-                  color: Colors.red,
+                body: notFound
+                    ? const Center(
+                        child: Text('Not Found', style: TextStyle(fontSize: 30)),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          country = null;
+                          category = null;
+                          findNews = null;
+                          cName = null;
+                          getNews();
+                        },
+                        child: FutureBuilder<NewsModel>(
+                            future: getNews(searchKey: findNews),
+                            // log()
+                            builder: (context, snapshot) {
+                              print(snapshot.connectionState);
+                              print(findNews);
+                              if (snapshot.hasData) {
+                                if (j == 1) {
+                                  checkConnection();
+                                  j++;
+                                }
+                                print('yes');
+                                print(snapshot.data!.articles[0].source!.name);
+                                return ListView.builder(
+                                  // controller: controller,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(5),
+                                          child: Card(
+                                            elevation: 5,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: GestureDetector(
+                                              onTap: () async {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    fullscreenDialog: true,
+                                                    builder:
+                                                        (BuildContext context) =>
+                                                            ArticalNews(
+                                                      newsUrl: snapshot.data!
+                                                          .articles[index].url,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  vertical: 10,
+                                                  horizontal: 15,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    Stack(
+                                                      children: [
+                                                        if (snapshot
+                                                                .data!
+                                                                .articles[index]
+                                                                .urlToImage ==
+                                                            null)
+                                                          Container()
+                                                        else
+                                                          ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(20),
+                                                            child:
+                                                                CachedNetworkImage(
+                                                              placeholder: (BuildContext
+                                                                          context,
+                                                                      String
+                                                                          url) =>
+                                                                  Container(),
+                                                              errorWidget: (BuildContext
+                                                                          context,
+                                                                      String url,
+                                                                      error) =>
+                                                                  const SizedBox(),
+                                                              imageUrl: snapshot
+                                                                  .data!
+                                                                  .articles[index]
+                                                                  .urlToImage!,
+                                                            ),
+                                                          ),
+                                                        Positioned(
+                                                          top: 3,
+                                                          right: 3,
+                                                          child: Card(
+                                                            elevation: 0,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor
+                                                                .withOpacity(0.8),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                horizontal: 10,
+                                                                vertical: 8,
+                                                              ),
+                                                              child: Text(
+                                                                snapshot
+                                                                    .data!
+                                                                    .articles[
+                                                                        index]
+                                                                    .source!
+                                                                    .name!,
+                                                                style: Theme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .subtitle2,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const Divider(),
+                                                    Text(
+                                                      snapshot.data!
+                                                          .articles[index].title,
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 18,
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        if (index ==
+                                            snapshot.data!.articles.length - 1)
+                                          Center(
+                                            child: Container(
+                                              child: Text('No more data'),
+                                            ),
+                                          )
+                                        else
+                                          const SizedBox(),
+                                      ],
+                                    );
+                                  },
+                                  itemCount: snapshot.data!.articles.length,
+                                );
+                              } else if (snapshot.hasError) {
+                                checkConnection();
+                                return Text('${snapshot.error}');
+                              }
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }),
+                      ),
+                floatingActionButton: Builder(
+                  builder: (context) => FabCircularMenu(
+                    alignment: Alignment.bottomRight,
+                    ringColor: Colors.red.withOpacity(0.0),
+                    ringDiameter: 360.0,
+                    ringWidth: 60.0,
+                    fabSize: 60.0,
+                    fabElevation: 8.0,
+                    fabColor: Colors.black,
+                    fabOpenIcon: Image.asset('assets/images/logo1.png'),
+                    fabCloseIcon: Icon(Icons.close, color: Colors.red),
+                    fabMargin: const EdgeInsets.all(20.0),
+                    animationDuration: const Duration(milliseconds: 800),
+                    animationCurve: Curves.easeInOutCirc,
+                    onDisplayChange: (isOpen) {
+                      if (isOpen) {
+                        setState(() {
+                          IsOpened = "Yes";
+                        });
+                      } else {
+                        setState(() {
+                          IsOpened = "No";
+                        });
+                      }
+                    },
+                    children: [
+                      SizedBox(
+                        height: 500,
+                        width: 500,
+                      ),
+                      FloatingActionButton(
+                        mini: true,
+                        backgroundColor: Colors.black,
+                        heroTag: "Home",
+                        child: Icon(
+                          Icons.home,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            hey = hey + 1;
+                          });
+                        },
+                      ),
+                      SizedBox(
+                        height: 500,
+                        width: 500,
+                      ),
+                      FloatingActionButton(
+                        backgroundColor: Colors.black,
+                        mini: true,
+                        heroTag: "Live TV",
+                        child: Icon(
+                          Icons.video_call,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            hey = hey + 2;
+                          });
+                        },
+                      ),
+                      SizedBox(
+                        height: 500,
+                        width: 500,
+                      ),
+                      FloatingActionButton(
+                        backgroundColor: Colors.black,
+                        mini: true,
+                        heroTag: "Profile",
+                        child: Icon(
+                          Icons.account_circle,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            hey = hey - 1;
+                          });
+                        },
+                      ),
+                      SizedBox(
+                        height: 500,
+                        width: 500,
+                      ),
+                      FloatingActionButton(
+                        backgroundColor: Colors.black,
+                        mini: true,
+                        heroTag: "Setting",
+                        child: Icon(
+                          Icons.settings,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            hey = hey - 2;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                onPressed: () {
-                  setState(() {
-                    hey = hey + 2;
-                  });
-                },
               ),
-              SizedBox(
-                height: 500,
-                width: 500,
-              ),
-              FloatingActionButton(
-                backgroundColor: Colors.black,
-                mini: true,
-                heroTag: "Profile",
-                child: Icon(
-                  Icons.account_circle,
-                  color: Colors.red,
-                ),
-                onPressed: () {
-                  setState(() {
-                    hey = hey - 1;
-                  });
-                },
-              ),
-              SizedBox(
-                height: 500,
-                width: 500,
-              ),
-              FloatingActionButton(
-                backgroundColor: Colors.black,
-                mini: true,
-                heroTag: "Setting",
-                child: Icon(
-                  Icons.settings,
-                  color: Colors.red,
-                ),
-                onPressed: () {
-                  setState(() {
-                    hey = hey - 2;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
+        routes: {
+          MyRoutes.firstRoute: (context) => MyHomePage(),
+        },
       ),
-      routes: {
-        MyRoutes.firstRoute: (context) => MyHomePage(),
-      },
     );
   }
 
-  checkConnection() async{
-    var connection =await Connectivity().checkConnectivity();
-    if(connection==ConnectivityResult.none){
+  checkConnection() async {
+    var connection = await Connectivity().checkConnectivity();
+    if (connection == ConnectivityResult.none) {
       return showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -632,41 +620,76 @@ class _MyAppState extends State<MyApp> {
               child: Container(
                 color: Colors.red,
                 padding: const EdgeInsets.all(14),
-                child: const Text("okay",style: TextStyle(color: Colors.black),),
+                child: const Text(
+                  "okay",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Alert Dialog Box"),
+          content: const Text('Connected'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: Container(
+                color: Colors.red,
+                padding: const EdgeInsets.all(14),
+                child: const Text(
+                  "okay",
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           ],
         ),
       );
     }
-    else {
-        return showDialog(
-          context: context,
-          builder: (ctx) =>
-              AlertDialog(
-                title: const Text("Alert Dialog Box"),
-                content: const Text('Connected'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                    },
-                    child: Container(
-                      color: Colors.red,
-                      padding: const EdgeInsets.all(14),
-                      child: const Text(
-                        "okay", style: TextStyle(color: Colors.black),),
-                    ),
-                  ),
-                ],
-              ),
-        );
-    }
   }
 
+  Future<bool> _onBackButtonPressed(BuildContext context) async {
+    bool? exitApp = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Really ??"),
+            content: const Text("Do you want to exit the app ?"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text("No"),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Navigator.of(context)
+                  //     .pushNamedAndRemoveUntil("/welcome", ModalRoute.withName('/welcome'));
+                  //     },
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text("Yes"),
+              ),
+            ],
+          );
+        });
+    return exitApp ?? false;
+  }
+
+
   Future<NewsModel> getDataFromApi(String url) async {
-    final http.Response res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30),onTimeout: (){
-      throw Exception ('error');
+    final http.Response res = await http
+        .get(Uri.parse(url))
+        .timeout(const Duration(seconds: 30), onTimeout: () {
+      throw Exception('error');
     });
     print(res.statusCode);
     if (res.statusCode == 200) {
@@ -707,7 +730,7 @@ class _MyAppState extends State<MyApp> {
       setState(() => news = []);
       pageNum = 1;
     }
-    baseApi = 'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&';
+    baseApi = 'https://newsapi.org/v2/top-headlines?pageSize=15&page=$pageNum&';
 
     baseApi += country == null ? 'country=in&' : 'country=$country&';
     baseApi += category == null ? '' : 'category=$category&';
@@ -717,27 +740,35 @@ class _MyAppState extends State<MyApp> {
       country = null;
       category = null;
       baseApi =
-      'https://newsapi.org/v2/top-headlines?pageSize=10&page=$pageNum&q=$searchKey&apiKey=9bb7bf6152d147ad8ba14cd0e7452f2f';
+          'https://newsapi.org/v2/top-headlines?pageSize=15&page=$pageNum&q=$searchKey&apiKey=9bb7bf6152d147ad8ba14cd0e7452f2f';
+    }
+    else{
+      baseApi='https://newsapi.org/v2/top-headlines?country=in&pageSize=15&page=$pageNum&&apiKey=9bb7bf6152d147ad8ba14cd0e7452f2f';
     }
     print(searchKey);
     return getDataFromApi(baseApi);
   }
 
-
-
-
+  var connectionStatus;
 
   @override
   void initState() {
-    controller = ScrollController()..addListener(_scrollListener);
+    // controller = ScrollController()..addListener(_scrollListener);
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      setState(() => connectionStatus = result);
+    });
     getNews();
     super.initState();
   }
 
-  void _scrollListener() {
-    if (controller.position.pixels == controller.position.maxScrollExtent) {
-      setState(() => isLoading = true);
-      getNews();
-    }
-  }
+// void _scrollListener() {
+//   if (controller.position.pixels == controller.position.maxScrollExtent) {
+//     setState(() {
+//       isLoading = true;
+//     }
+//   );
+//   }
+// }
 }
