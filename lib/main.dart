@@ -741,7 +741,7 @@ class _MyAppState extends State<MyApp> {
       country = null;
       category = null;
       baseApi =
-          'https://newsapi.org/v2/top-headlines?pageSize=15&page=$pageNum&q=$searchKey&apiKey=9bb7bf6152d147ad8ba14cd0e7452f2f';
+          'https://newsapi.org/v2/top-headlines?pageSize=15&page=$pageNum&q=$searchKey&apiKey=0780ae6e79a6458f9336fbc9e1777d88';
     }
     print(searchKey);
     return getDataFromApi(baseApi);
