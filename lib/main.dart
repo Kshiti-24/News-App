@@ -1,20 +1,17 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
+import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
+
 import 'articleNews.dart';
 import 'constants.dart';
 import 'country.dart';
-import 'dart:async';
-import 'package:lottie/lottie.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
-import 'package:fab_circular_menu/fab_circular_menu.dart';
 
 void main() => runApp(MyApp());
 bool counter = true;
@@ -70,7 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class SecondPage extends StatelessWidget {
   const SecondPage({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -317,8 +313,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                         textInputAction: TextInputAction.search,
                         onChanged: (String? val) {
-                          if(val!.length>3)
-                          setState(() => findNews = val);
+                          if (val!.length > 3) setState(() => findNews = val);
                         },
                       ),
                     ),
@@ -326,7 +321,8 @@ class _MyAppState extends State<MyApp> {
                 ),
                 body: notFound
                     ? const Center(
-                        child: Text('Not Found', style: TextStyle(fontSize: 30)),
+                        child:
+                            Text('Not Found', style: TextStyle(fontSize: 30)),
                       )
                     : RefreshIndicator(
                         onRefresh: () async {
@@ -337,8 +333,10 @@ class _MyAppState extends State<MyApp> {
                           getNews();
                         },
                         child: FutureBuilder<NewsModel>(
-                            future: getNews(searchKey: findNews,category: category,country: country ),
-
+                            future: getNews(
+                                searchKey: findNews,
+                                category: category,
+                                country: country),
                             builder: (context, snapshot) {
                               print(snapshot.connectionState);
                               print(findNews);
@@ -354,7 +352,8 @@ class _MyAppState extends State<MyApp> {
                                 print(snapshot.data!.articles[0].source!.name);
                                 return ListView.builder(
                                   // controller: controller,
-                                  itemBuilder: (BuildContext context, int index) {
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
                                     return Column(
                                       children: [
                                         Padding(
@@ -371,9 +370,9 @@ class _MyAppState extends State<MyApp> {
                                                   context,
                                                   MaterialPageRoute(
                                                     fullscreenDialog: true,
-                                                    builder:
-                                                        (BuildContext context) =>
-                                                            ArticalNews(
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        ArticalNews(
                                                       newsUrl: snapshot.data!
                                                           .articles[index].url,
                                                     ),
@@ -404,7 +403,8 @@ class _MyAppState extends State<MyApp> {
                                                           ClipRRect(
                                                             borderRadius:
                                                                 BorderRadius
-                                                                    .circular(20),
+                                                                    .circular(
+                                                                        20),
                                                             child:
                                                                 CachedNetworkImage(
                                                               placeholder: (BuildContext
@@ -414,12 +414,14 @@ class _MyAppState extends State<MyApp> {
                                                                   Container(),
                                                               errorWidget: (BuildContext
                                                                           context,
-                                                                      String url,
+                                                                      String
+                                                                          url,
                                                                       error) =>
                                                                   const SizedBox(),
                                                               imageUrl: snapshot
                                                                   .data!
-                                                                  .articles[index]
+                                                                  .articles[
+                                                                      index]
                                                                   .urlToImage!,
                                                             ),
                                                           ),
@@ -431,7 +433,8 @@ class _MyAppState extends State<MyApp> {
                                                             color: Theme.of(
                                                                     context)
                                                                 .primaryColor
-                                                                .withOpacity(0.8),
+                                                                .withOpacity(
+                                                                    0.8),
                                                             child: Padding(
                                                               padding:
                                                                   const EdgeInsets
@@ -458,8 +461,10 @@ class _MyAppState extends State<MyApp> {
                                                     ),
                                                     const Divider(),
                                                     Text(
-                                                      snapshot.data!
-                                                          .articles[index].title,
+                                                      snapshot
+                                                          .data!
+                                                          .articles[index]
+                                                          .title,
                                                       style: const TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
@@ -684,11 +689,14 @@ class _MyAppState extends State<MyApp> {
     return exitApp ?? false;
   }
 
-
   Future<NewsModel> getDataFromApi(String url) async {
-    final http.Response res = await http
-        .get(Uri.parse(url))
-        .timeout(const Duration(seconds: 30), onTimeout: () {
+    // final http.Response res = await http
+    //     .get(Uri.parse(url))
+    //     .timeout(const Duration(seconds: 30), onTimeout: () {
+    //   throw Exception('error');
+    // });
+    var res = await Dio().get(url).timeout(const Duration(seconds: 30),
+        onTimeout: () {
       throw Exception('error');
     });
     print(res.statusCode);
@@ -711,7 +719,8 @@ class _MyAppState extends State<MyApp> {
       //     });
       //   }
       //   log(res.body.toString());
-      return newsModelFromJson(res.body);
+      print(NewsModel.fromJson(res.data));
+      return NewsModel.fromJson(res.data);
     } else {
       // setState(() => notFound = true);
       throw Exception('Not Found');
@@ -741,7 +750,7 @@ class _MyAppState extends State<MyApp> {
       country = null;
       category = null;
       baseApi =
-          'https://newsapi.org/v2/top-headlines?pageSize=15&page=$pageNum&q=$searchKey&apiKey=0780ae6e79a6458f9336fbc9e1777d88';
+          'https://newsapi.org/v2/top-headlines?pageSize=18&page=$pageNum&q=$searchKey&apiKey=0780ae6e79a6458f9336fbc9e1777d88';
     }
     print(searchKey);
     return getDataFromApi(baseApi);
